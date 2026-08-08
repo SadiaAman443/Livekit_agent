@@ -1,0 +1,23 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+@layer base {
+  body {
+    @apply bg-[#f8fafc] text-[#0f172a] antialiased;
+    font-family: 'Inter', sans-serif;
+  }
+}
+
+@layer utilities {
+  .crm-card {
+    @apply bg-white rounded-xl border border-border shadow-sm;
+  }
+  .crm-button-primary {
+    @apply bg-primary text-white px-4 py-2 rounded-md hover:bg-blue-800 transition-colors font-medium text-sm;
+  }
+  .crm-input {
+    @apply border border-border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-primary w-full;
+  }
+}
