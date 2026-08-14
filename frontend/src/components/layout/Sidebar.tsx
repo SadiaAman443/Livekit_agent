@@ -5,12 +5,14 @@ import {
   MessageSquare, 
   Database, 
   Settings2,
-  Hexagon
+  Hexagon,
+  Users
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
+  { name: 'AI Leads', path: '/leads', icon: Users },
   { name: 'Chat', path: '/chat', icon: MessageSquare },
   { name: 'Knowledge Base', path: '/knowledge', icon: Database },
   { name: 'Prompt Manager', path: '/prompt', icon: Settings2 },
