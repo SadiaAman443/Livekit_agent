@@ -147,17 +147,22 @@ class Call(Base):
 
     livekit_call_id = Column(String(255), nullable=True)
     livekit_room_id = Column(String(255), nullable=True)
+    vobiz_call_id = Column(String(255), nullable=True)
 
     transcript = Column(Text, nullable=True)
     summary = Column(Text, nullable=True)
+    recording_url = Column(String(2048), nullable=True)
 
     duration_seconds = Column(Integer, nullable=True)
+    start_time = Column(DateTime, nullable=True)
+    end_time = Column(DateTime, nullable=True)
 
     status = Column(String(50), default="COMPLETED", nullable=False)
 
     created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
 
     lead = relationship("Lead", back_populates="calls")
+
 
 
 class Callback(Base):

@@ -6,6 +6,8 @@ import { KnowledgeBase } from './pages/KnowledgeBase';
 import { PromptManager } from './pages/PromptManager';
 import { LeadsList } from './pages/LeadsList';
 import { LeadDetails } from './pages/LeadDetails';
+import { CallLogs } from './pages/CallLogs';
+import { CallbackRequests } from './pages/CallbackRequests';
 
 function App() {
   return (
@@ -15,6 +17,8 @@ function App() {
           <Route index element={<Dashboard />} />
           <Route path="leads" element={<LeadsList />} />
           <Route path="leads/:id" element={<LeadDetails />} />
+          <Route path="calls" element={<CallLogs />} />
+          <Route path="callbacks" element={<CallbackRequests />} />
           <Route path="chat" element={<Chat />} />
           <Route path="knowledge" element={<KnowledgeBase />} />
           <Route path="prompt" element={<PromptManager />} />

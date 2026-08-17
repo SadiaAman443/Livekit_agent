@@ -25,6 +25,8 @@ class CallCreate(BaseModel):
     lead_id: UUID
     livekit_call_id: Optional[str] = None
     livekit_room_id: Optional[str] = None
+    vobiz_call_id: Optional[str] = None
+    recording_url: Optional[str] = None
     transcript: Optional[str] = None
     summary: Optional[str] = None
     duration_seconds: Optional[int] = None
@@ -35,6 +37,8 @@ class CallResponse(BaseModel):
     lead_id: UUID
     livekit_call_id: Optional[str] = None
     livekit_room_id: Optional[str] = None
+    vobiz_call_id: Optional[str] = None
+    recording_url: Optional[str] = None
     transcript: Optional[str] = None
     summary: Optional[str] = None
     duration_seconds: Optional[int] = None
@@ -62,6 +66,11 @@ class CallbackResponse(BaseModel):
     status: str
     created_at: datetime
     updated_at: datetime
+    
+    # Extra fields for list view joins
+    customer_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    project_name: Optional[str] = None
 
     model_config = {"from_attributes": True}
 
@@ -70,3 +79,35 @@ class LeadUpdate(BaseModel):
 
 class CallbackUpdate(BaseModel):
     status: Optional[str] = None
+
+# Pagination wrappers
+class PaginatedLeads(BaseModel):
+    total: int
+    items: list[LeadResponse]
+
+class CallListResponse(BaseModel):
+    id: UUID
+    lead_id: UUID
+    livekit_call_id: Optional[str] = None
+    livekit_room_id: Optional[str] = None
+    vobiz_call_id: Optional[str] = None
+    recording_url: Optional[str] = None
+    summary: Optional[str] = None
+    duration_seconds: Optional[int] = None
+    status: str
+    created_at: datetime
+    
+    # Extra fields for list view joins
+    customer_name: Optional[str] = None
+    phone_number: Optional[str] = None
+    project_name: Optional[str] = None
+
+    model_config = {"from_attributes": True}
+
+class PaginatedCalls(BaseModel):
+    total: int
+    items: list[CallListResponse]
+
+class PaginatedCallbacks(BaseModel):
+    total: int
+    items: list[CallbackResponse]

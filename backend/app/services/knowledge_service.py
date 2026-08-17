@@ -89,6 +89,13 @@ class KnowledgeService:
             query = query.join(Document).filter(Document.document_type == source_type)
 
         chunks_to_process = query.all()
+        logger.info(f"Reindex document_id: {document_id}")
+        logger.info(f"Chunks found for reindex: {len(chunks_to_process)}")
+
+        if chunks_to_process:
+         logger.info(
+        f"Chunk statuses: {[chunk.embedding_status for chunk in chunks_to_process]}"
+    )
         if not chunks_to_process:
             return {"status": "success", "message": "No pending or failed chunks to reindex.", "processed": 0}
 

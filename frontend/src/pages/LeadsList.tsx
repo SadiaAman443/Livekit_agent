@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { crmApi } from '../api/crm';
 import { Lead } from '../types/crm';
 import { Badge, getStatusBadgeVariant } from '../components/ui/Badge';
-import { Search, Filter, Phone, Calendar } from 'lucide-react';
+import { Search, Filter, Phone, Calendar, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export const LeadsList: React.FC = () => {
   const navigate = useNavigate();
@@ -13,34 +13,50 @@ export const LeadsList: React.FC = () => {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
   const [projectFilter, setProjectFilter] = useState('');
+  
+  // Pagination
+  const [page, setPage] = useState(1);
+  const [total, setTotal] = useState(0);
+  const limit = 20;
 
-  const fetchLeads = async () => {
+  // Debounce search term
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchTerm);
+      setPage(1); // Reset to first page on new search
+    }, 500);
+    return () => clearTimeout(handler);
+  }, [searchTerm]);
+
+  const fetchLeads = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
-      const data = await crmApi.getLeads(statusFilter || undefined, projectFilter || undefined);
-      setLeads(data);
+      const skip = (page - 1) * limit;
+      const data = await crmApi.getLeads(
+        statusFilter || undefined, 
+        projectFilter || undefined,
+        skip,
+        limit,
+        debouncedSearch || undefined
+      );
+      setLeads(data.items);
+      setTotal(data.total);
     } catch (err: any) {
       setError(err.message || 'Failed to fetch leads');
     } finally {
       setLoading(false);
     }
-  };
+  }, [statusFilter, projectFilter, page, limit, debouncedSearch]);
 
   useEffect(() => {
     fetchLeads();
-  }, [statusFilter, projectFilter]);
+  }, [fetchLeads]);
 
-  const filteredLeads = leads.filter(lead => {
-    if (!searchTerm) return true;
-    const term = searchTerm.toLowerCase();
-    return (
-      lead.customer_name.toLowerCase().includes(term) ||
-      (lead.phone_number && lead.phone_number.includes(term))
-    );
-  });
+  const totalPages = Math.ceil(total / limit);
 
   return (
     <div className="p-8 max-w-7xl mx-auto">
@@ -70,7 +86,10 @@ export const LeadsList: React.FC = () => {
               <Filter className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
               <select 
                 value={statusFilter}
-                onChange={e => setStatusFilter(e.target.value)}
+                onChange={e => {
+                  setStatusFilter(e.target.value);
+                  setPage(1);
+                }}
                 className="w-full pl-9 pr-4 py-2 rounded-lg border border-border appearance-none bg-white focus:outline-none focus:ring-2 focus:ring-primary/20 text-sm"
               >
                 <option value="">All Statuses</option>
@@ -85,12 +104,15 @@ export const LeadsList: React.FC = () => {
         </div>
 
         {/* Content */}
-        <div className="overflow-x-auto">
+        <div className="overflow-x-auto min-h-[400px]">
           {loading ? (
-            <div className="p-12 text-center text-slate-500">Loading leads...</div>
+            <div className="p-12 text-center text-slate-500 flex flex-col items-center">
+               <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin mb-4"></div>
+               Loading leads...
+            </div>
           ) : error ? (
             <div className="p-12 text-center text-red-500">{error}</div>
-          ) : filteredLeads.length === 0 ? (
+          ) : leads.length === 0 ? (
             <div className="p-12 text-center text-slate-500">
               No leads found matching your criteria.
             </div>
@@ -106,7 +128,7 @@ export const LeadsList: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
-                {filteredLeads.map(lead => (
+                {leads.map(lead => (
                   <tr 
                     key={lead.id} 
                     onClick={() => navigate(`/leads/${lead.id}`)}
@@ -137,6 +159,31 @@ export const LeadsList: React.FC = () => {
             </table>
           )}
         </div>
+        
+        {/* Pagination Controls */}
+        {!loading && totalPages > 1 && (
+          <div className="p-4 border-t border-border bg-slate-50 flex items-center justify-between">
+            <span className="text-sm text-slate-500">
+              Showing {((page - 1) * limit) + 1} to {Math.min(page * limit, total)} of {total} leads
+            </span>
+            <div className="flex gap-2">
+              <button 
+                disabled={page === 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                className="p-2 border border-border rounded hover:bg-white disabled:opacity-50 transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <button 
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                className="p-2 border border-border rounded hover:bg-white disabled:opacity-50 transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

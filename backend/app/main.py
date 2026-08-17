@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 import logging
+import sys
 
 from app.api.routes import router as api_router
 from app.database.session import engine
@@ -12,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Fix charmap codec issue on windows for the checkmark symbol
+    sys.stdout.reconfigure(encoding='utf-8')
     print("✓ Environment Loaded")
     try:
         with engine.connect() as conn:

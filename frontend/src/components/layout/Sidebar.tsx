@@ -6,13 +6,17 @@ import {
   Database, 
   Settings2,
   Hexagon,
-  Users
+  Users,
+  Phone,
+  Calendar
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navItems = [
   { name: 'Dashboard', path: '/', icon: LayoutDashboard },
   { name: 'AI Leads', path: '/leads', icon: Users },
+  { name: 'Call Logs', path: '/calls', icon: Phone },
+  { name: 'Callbacks', path: '/callbacks', icon: Calendar },
   { name: 'Chat', path: '/chat', icon: MessageSquare },
   { name: 'Knowledge Base', path: '/knowledge', icon: Database },
   { name: 'Prompt Manager', path: '/prompt', icon: Settings2 },

@@ -5,6 +5,44 @@ import { Lead, Call, Callback } from '../types/crm';
 import { Badge, getStatusBadgeVariant } from '../components/ui/Badge';
 import { ArrowLeft, Phone, User, Building, Clock, Calendar, FileText } from 'lucide-react';
 
+const CallTranscript: React.FC<{ callId: string }> = ({ callId }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [transcript, setTranscript] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleToggle = async (e: React.SyntheticEvent<HTMLDetailsElement>) => {
+    const detailsOpen = e.currentTarget.open;
+    setIsOpen(detailsOpen);
+    if (detailsOpen && !transcript) {
+      setLoading(true);
+      try {
+        const fullCall = await crmApi.getCall(callId);
+        setTranscript(fullCall.transcript || 'No transcript available.');
+      } catch (err) {
+        setTranscript('Failed to load transcript.');
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
+  return (
+    <details className="text-sm" onToggle={handleToggle}>
+      <summary className="text-primary cursor-pointer hover:underline font-medium">
+        View Transcript
+      </summary>
+      <div className="mt-2 p-3 bg-slate-50 rounded-md border border-slate-200 whitespace-pre-wrap text-slate-600">
+        {loading ? (
+           <span className="flex items-center text-slate-400">
+             <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin mr-2"></div>
+             Loading...
+           </span>
+        ) : transcript}
+      </div>
+    </details>
+  );
+};
+
 export const LeadDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -210,16 +248,22 @@ export const LeadDetails: React.FC = () => {
                         </div>
                       )}
 
-                      {call.transcript && (
-                        <details className="text-sm">
-                          <summary className="text-primary cursor-pointer hover:underline font-medium">
-                            View Transcript
-                          </summary>
-                          <div className="mt-2 p-3 bg-slate-50 rounded-md border border-slate-200 whitespace-pre-wrap text-slate-600">
-                            {call.transcript}
-                          </div>
-                        </details>
+                      {call.recording_url && (
+                        <div className="mb-3">
+                          <span className="font-semibold text-sm text-slate-700 block mb-1">Recording:</span>
+                          <audio controls src={call.recording_url} className="w-full max-w-md h-10">
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
                       )}
+                      
+                      {call.vobiz_call_id && (
+                        <div className="text-xs text-slate-400 mb-3 font-mono">
+                          Vobiz ID: {call.vobiz_call_id}
+                        </div>
+                      )}
+
+                      <CallTranscript callId={call.id} />
                     </li>
                   ))}
                 </ul>
